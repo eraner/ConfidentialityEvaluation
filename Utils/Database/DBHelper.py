@@ -1,19 +1,43 @@
 __author__ = 'eranlaudin'
-
-
 import sqlite3
 
-connection = sqlite3.connect("auth.db")
-cursor = connection.cursor()
 
-cursor.execute("""DROP TABLE employee;""")
+def execute_query(sql_command):
+    '''
+    Gets a query and executes it.
+    :param sql_command: query
+    :return:
+    '''
+    cursor = connection.cursor()
+    cursor.execute(sql_command)
+    connection.commit()
 
-sql_command = """CREATE TABLE employee
-(staff_number INTEGER PRIMARY KEY,fname VARCHAR(20),lname VARCHAR(30),
-gender CHAR(1),joining DATE,birth_date DATE);"""
 
-cursor.execute(sql_command)
+def db_init():
+    '''
+    Initialize Database.
+    :return:
+    '''
+    # delete
+    execute_query("""DROP TABLE Users;""")
 
-connection.commit()
+    # Create Users table
+    sql_command = """CREATE TABLE Users
+                    (id INTEGER PRIMARY KEY,
+                        name VARCHAR(40),
+                        role VARCHAR(20),
+                        joining DATE,
+                        birth_date DATE);"""
+    execute_query(sql_command)
 
-connection.close()
+    sql_command = """INSERT INTO Users (id, name, role, joining, birth_date)
+        VALUES (NULL, "Eran Laudin", "Manager", "2017-11-02", "1961-10-25");"""
+    execute_query(sql_command)
+
+
+if __name__ == "__main__":
+    connection = sqlite3.connect("auth.db")
+
+    db_init()
+
+    connection.close()
