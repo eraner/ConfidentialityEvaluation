@@ -1,4 +1,3 @@
-__author__ = 'eranlaudin'
 import sqlite3
 
 
@@ -30,10 +29,15 @@ def db_init():
                         birth_date DATE);"""
     execute_query(sql_command)
 
+    # Add Users
     sql_command = """INSERT INTO Users (id, name, role, joining, birth_date)
         VALUES (NULL, "Eran Laudin", "Manager", "2017-11-02", "1961-10-25");"""
     execute_query(sql_command)
+    sql_command = """INSERT INTO Users (id, name, role, joining, birth_date)
+        VALUES (NULL, "Ohad Cohen", "Cleaner", "2017-11-02", "1965-05-20");"""
+    execute_query(sql_command)
 
+    # Create 
 
 if __name__ == "__main__":
     connection = sqlite3.connect("auth.db")
