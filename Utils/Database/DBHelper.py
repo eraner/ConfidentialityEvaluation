@@ -23,6 +23,9 @@ def db_init():
     '''
 # delete
     execute_query("""DROP TABLE Users;""")
+    execute_query("""DROP TABLE Roles;""")
+    execute_query("""DROP TABLE Resources;""")
+    execute_query("""DROP TABLE Rules;""")
 
 # Create Users table
     sql_command = """CREATE TABLE Users
@@ -36,14 +39,14 @@ def db_init():
     execute_query(sql_command)
 
 # Add Users
-    sql_command = """INSERT INTO Users (id, name, role, joining, birth_date)
+    sql_command = """INSERT INTO Users (id, u_name, role, joining, birth_date)
         VALUES (NULL, "Eran Laudin", "Manager", "2017-11-02", "1961-10-25"),
                 (NULL, "Ohad Cohen", "Cleaner", "2017-11-02", "1965-05-20");"""
     execute_query(sql_command)
 
 # Create Roles table
     sql_command = """CREATE TABLE Roles
-                    (name INTEGER PRIMARY KEY,
+                    (name VARCHAR(40) PRIMARY KEY,
                     rank INTEGER
                     );"""
     execute_query(sql_command)
@@ -71,14 +74,18 @@ def db_init():
     sql_command = """INSERT INTO Resources (id, name, type) VALUES
                     (NULL, "DevCode", "dir"),
                     (NULL, "Salaries", "xlsx"),
-                    (NULL, "", "");
+                    (NULL, "Public", "dir");
                     """
 
 # Create Rules table
     sql_command = """CREATE TABLE Rules
-                    (TODO
+                    (role VARCHAR(40),
+                    id INTEGER,
+                    FOREIGN KEY(role) REFERENCES Roles(name)
+                    FOREIGN KEY(id) REFERENCES Resources(id)
                     );"""
     execute_query(sql_command)
+
 
 if __name__ == "__main__":
     connection = sqlite3.connect("auth.db")
