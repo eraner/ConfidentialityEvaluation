@@ -1,14 +1,19 @@
-import urllib3
+import urllib2
+import zipfile
+import os
 
+'''URL of nvd latest version'''
 url = "https://static.nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-modified.json.zip"
 
+'''setup file path and download NVD'''
 file_name = url.split('/')[-1]
-u = urllib.urlretrieve(url, "nvdcve-1.0-modified.json.zip")
+u = urllib2.urlopen(url)
 f = open(file_name, 'wb')
 meta = u.info()
 file_size = int(meta.getheaders("Content-Length")[0])
 print("Downloading: %s Bytes: %s" % (file_name, file_size))
 
+'''Downloading..'''
 file_size_dl = 0
 block_sz = 8192
 while True:
@@ -23,3 +28,11 @@ while True:
     print(status)
 
 f.close()
+
+'''Unzip NVD file and delete zip file.'''
+zip_ref = zipfile.ZipFile(file_name, 'r')
+zip_ref.extractall(".\NVD_File\\nvdcve-1.0-modified.json")
+zip_ref.close()
+
+os.remove(file_name)
+
