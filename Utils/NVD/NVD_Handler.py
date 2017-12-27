@@ -39,9 +39,7 @@ if __name__ == "__main__":
     os.remove(file_name)
 
 
-def get_vulnerability_by_app_name(app_name):
-    #json_file = open(".\NVD_File\\nvdcve-1.0-modified.json", "r")
-    #print(json_file)
+def get_vulnerability_db():
     file = "Utils\\NVD\\NVD_File\\Modified\\nvdcve-1.0-modified.json"
 
     file_data = open(file)

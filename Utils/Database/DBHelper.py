@@ -1,13 +1,6 @@
 import sqlite3
 from sqlite3 import Error
 
-"""
-TODO: documentation
-"""
-
-def test():
-    return True
-
 
 def execute_query(sql_command):
     '''
@@ -45,7 +38,10 @@ def db_init():
 # Add Users
     sql_command = """INSERT INTO Users (id, u_name, role, joining, birth_date)
         VALUES (NULL, "Eran Laudin", "Manager", "2017-11-02", "1961-10-25"),
-                (NULL, "Ohad Cohen", "Cleaner", "2017-11-02", "1965-05-20");"""
+                (NULL, "Ohad Cohen", "Cleaner", "2017-11-02", "1965-05-20"),
+                (NULL, "Nir Levi", "Developer", "2017-12-01", "1990-04-15"),
+                (NULL, "Omri Koresh", "QA", "2017-10-01", "1990-04-18"),
+                (NULL, "Yael Gershenshtein", "Guard", "2017-09-01", "1992-04-15");"""
     execute_query(sql_command)
 
 # Create Roles table
