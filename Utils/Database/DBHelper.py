@@ -1,8 +1,12 @@
 import sqlite3
+from sqlite3 import Error
 
 """
 TODO: documentation
 """
+
+def test():
+    return True
 
 
 def execute_query(sql_command):
@@ -76,19 +80,94 @@ def db_init():
                     (NULL, "Salaries", "xlsx"),
                     (NULL, "Public", "dir");
                     """
+    execute_query(sql_command)
 
 # Create Rules table
     sql_command = """CREATE TABLE Rules
                     (role VARCHAR(40),
-                    id INTEGER,
+                    resource_id INTEGER,
+                    permissions VARCHAR(10),
                     FOREIGN KEY(role) REFERENCES Roles(name)
-                    FOREIGN KEY(id) REFERENCES Resources(id)
+                    FOREIGN KEY(resource_id) REFERENCES Resources(id)
                     );"""
     execute_query(sql_command)
 
+# Add Rules
+    sql_command = """INSERT INTO Rules (role, resource_id, permissions) VALUES
+                    ("Manager", 2, "rw"),
+                    ("Cleaner", 3, "r");
+                    """
+    execute_query(sql_command)
+
+
+def create_connection(db_file):
+    """ create a database connection to the SQLite database
+        specified by the db_file
+    :param db_file: database file
+    :return: Connection object or None
+    """
+    try:
+        conn = sqlite3.connect(db_file)
+        return conn
+    except Error as e:
+        print(e)
+
+    return None
+
+
+def GetAllResources(conn):
+    """
+    Query all rows in the Resources table
+    :param conn: the Connection object
+    :return:
+    """
+    return FetchTable(conn, "Resources")
+
+
+def GetAllRoles(conn):
+    """
+    Query all rows in the Roles table
+    :param conn: the Connection object
+    :return:
+    """
+    return FetchTable(conn, "Roles")
+
+
+def GetAllUsers(conn):
+    """
+    Query all rows in the Users table
+    :param conn: the Connection object
+    :return:
+    """
+    return FetchTable(conn, "Users")
+
+
+def GetAllRules(conn):
+    """
+    Query all rows in the Rules Table
+    :param conn:
+    :return:
+    """
+    return FetchTable(conn, "Rules")
+
+
+def FetchTable(conn, table_name):
+    """
+    Query all rows in the requested table
+    :param conn: the Connection object
+            table_name: The requested table name to pull from DB
+    :return: rows of requested table
+    """
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM " + table_name + ";")
+
+    rows = cur.fetchall()
+
+    return rows
+
 
 if __name__ == "__main__":
-    connection = sqlite3.connect("auth.db")
+    connection = create_connection("auth.db")
 
     db_init()
 
