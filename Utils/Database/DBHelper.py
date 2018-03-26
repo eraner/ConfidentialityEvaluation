@@ -91,6 +91,7 @@ def db_init():
 # Add Rules
     sql_command = """INSERT INTO Rules (role, resource_id, permissions) VALUES
                     ("Manager", 2, "rw"),
+                    ("Developer", 1, "rw"),
                     ("Cleaner", 3, "r");
                     """
     execute_query(sql_command)
@@ -111,43 +112,75 @@ def create_connection(db_file):
     return None
 
 
-def GetAllResources(conn):
+def get_all_resources(conn):
     """
     Query all rows in the Resources table
     :param conn: the Connection object
     :return:
     """
-    return FetchTable(conn, "Resources")
+    return fetch_table(conn, "Resources")
 
 
-def GetAllRoles(conn):
+def get_all_roles(conn):
     """
     Query all rows in the Roles table
     :param conn: the Connection object
     :return:
     """
-    return FetchTable(conn, "Roles")
+    return fetch_table(conn, "Roles")
 
 
-def GetAllUsers(conn):
+def get_all_users(conn):
     """
     Query all rows in the Users table
     :param conn: the Connection object
     :return:
     """
-    return FetchTable(conn, "Users")
+    return fetch_table(conn, "Users")
 
 
-def GetAllRules(conn):
+def get_all_rules(conn):
     """
     Query all rows in the Rules Table
     :param conn:
     :return:
     """
-    return FetchTable(conn, "Rules")
+    return fetch_table(conn, "Rules")
 
 
-def FetchTable(conn, table_name):
+def insert_user(conn, username, role, join_date, birth_date):
+    """
+    Insert new user to Database
+    :param conn:
+    :param username:
+    :param role:
+    :param join_date:
+    :param birth_date:
+    :return: True when success, False when fail.
+    """
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM Users WHERE u_name=" + username+";")
+    rows = cur.fetchall()
+    if len(rows) != 0:
+        print "username already exists!"
+        return False
+
+    cur.execute("SELECT * FROM Roles WHERE name=" + role + ";")
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        print "Invalid role!"
+        return False
+
+    """TODO: validate dates legal"""
+
+    query = "INSERT INTO Users (id, u_name, role, joining, birth_date)" + \
+            "VALUES (NULL, \""+username+"\", \""+role+"\", \""+join_date+"\", \""+birth_date+"\")"
+    execute_query(query)
+    return True
+
+
+def fetch_table(conn, table_name):
     """
     Query all rows in the requested table
     :param conn: the Connection object
@@ -160,6 +193,36 @@ def FetchTable(conn, table_name):
     rows = cur.fetchall()
 
     return rows
+
+
+def print_authorization_system():
+    con = create_connection("Utils\\Database\\auth.db")
+
+    """Print Users Table"""
+    print("\n" + "-"*10 + "Getting all Users" + "-"*10)
+    allUsers = get_all_users(con)
+    for user in allUsers:
+        print(user)
+
+    """Print Roles Table"""
+    print("\n" + "-"*10 + "Getting all Roles" + "-"*10)
+    allRoles = get_all_roles(con)
+    for role in allRoles:
+        print(role)
+
+    """Print Rules Table"""
+    print("\n" + "-"*10 + "Getting all Rules" + "-"*10)
+    allRules = get_all_rules(con)
+    for role in allRules:
+        print(role)
+
+    """Print Resources Table"""
+    print("\n" + "-"*10 + "Getting all Resources" + "-"*10)
+    allResources = get_all_resources(con)
+    for resource in allResources:
+        print(resource)
+
+    con.close()
 
 
 if __name__ == "__main__":
