@@ -29,19 +29,17 @@ def db_init():
                     (id INTEGER PRIMARY KEY,
                     u_name VARCHAR(40),
                     role VARCHAR(40),
-                    joining DATE,
-                    birth_date DATE,
                     FOREIGN KEY(role) REFERENCES Roles(name)
                     );"""
     execute_query(sql_command)
 
 # Add Users
-    sql_command = """INSERT INTO Users (id, u_name, role, joining, birth_date)
-        VALUES (NULL, "Eran Laudin", "Manager", "2017-11-02", "1961-10-25"),
-                (NULL, "Ohad Cohen", "Cleaner", "2017-11-02", "1965-05-20"),
-                (NULL, "Nir Levi", "Developer", "2017-12-01", "1990-04-15"),
-                (NULL, "Omri Koresh", "QA", "2017-10-01", "1990-04-18"),
-                (NULL, "Yael Gershenshtein", "Guard", "2017-09-01", "1992-04-15");"""
+    sql_command = """INSERT INTO Users (id, u_name, role)
+        VALUES (NULL, "Eran Laudin", "Manager"),
+                (NULL, "Ohad Cohen", "Cleaner"),
+                (NULL, "Nir Levi", "Developer"),
+                (NULL, "Omri Koresh", "QA"),
+                (NULL, "Yael Gershenshtein", "Guard");"""
     execute_query(sql_command)
 
 # Create Roles table
@@ -148,35 +146,163 @@ def get_all_rules(conn):
     return fetch_table(conn, "Rules")
 
 
-def insert_user(conn, username, role, join_date, birth_date):
+def delete_role(role):
+    conn = create_connection("Utils\\Database\\auth.db")
+    cur = conn.cursor()
+    query = "DELETE FROM Roles WHERE name= \"" + role + "\";"
+    cur.execute(query)
+    conn.commit()
+
+
+def add_role(role, rank):
+    """
+    Insert new role to Database
+    :param role:
+    :return:
+    """
+    conn = create_connection("Utils\\Database\\auth.db")
+    cur = conn.cursor()
+    query = "INSERT INTO Roles (name, rank)" + \
+            "VALUES (\""+role+"\", "+rank+")"
+    try:
+        cur.execute(query)
+        conn.commit()
+    except Exception as e:
+        print "Something went wrong..\n" + str(e)
+
+
+def add_user(username, role):
     """
     Insert new user to Database
-    :param conn:
     :param username:
     :param role:
-    :param join_date:
-    :param birth_date:
     :return: True when success, False when fail.
     """
+    conn = create_connection("Utils\\Database\\auth.db")
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM Users WHERE u_name=" + username+";")
+    cur.execute("SELECT * FROM Users WHERE u_name=\"" + username+"\";")
     rows = cur.fetchall()
     if len(rows) != 0:
         print "username already exists!"
         return False
 
-    cur.execute("SELECT * FROM Roles WHERE name=" + role + ";")
+    cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
         print "Invalid role!"
         return False
 
-    """TODO: validate dates legal"""
+    query = "INSERT INTO Users (id, u_name, role)" + \
+            "VALUES (NULL, \""+username+"\", \""+role+"\")"
 
-    query = "INSERT INTO Users (id, u_name, role, joining, birth_date)" + \
-            "VALUES (NULL, \""+username+"\", \""+role+"\", \""+join_date+"\", \""+birth_date+"\")"
-    execute_query(query)
+    cur.execute(query)
+    conn.commit()
+    return True
+
+
+def delete_user(username):
+    """
+    remove user from Database
+    :param username:
+    :return:
+    """
+    conn = create_connection("Utils\\Database\\auth.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Users WHERE u_name=\"" + username + "\";")
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        print "username doesn't exist!"
+        return False
+    query = "DELETE FROM Users WHERE u_name= \"" + username + "\";"
+    cur.execute(query)
+    conn.commit()
+    return True
+
+
+def add_resource(name, r_type):
+    """
+    add resource to table.
+    :param name:
+    :param r_type:
+    :return:
+    """
+    conn = create_connection("Utils\\Database\\auth.db")
+    cur = conn.cursor()
+    query = "INSERT INTO Resources (id, name, type)" + \
+            "VALUES (NULL, \""+name+"\", \""+r_type+"\")"
+    try:
+        cur.execute(query)
+        conn.commit()
+    except Exception as e:
+        print "Something went wrong..\n" + str(e)
+
+
+def delete_resource_by_id(id):
+    conn = create_connection("Utils\\Database\\auth.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Resources WHERE id=" + id + ";")
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        print "resource doesn't exist!"
+        return False
+    query = "DELETE FROM Resources WHERE id= " + id + ";"
+    cur.execute(query)
+    conn.commit()
+    return True
+
+
+def add_rule(role, resource_id, permissions):
+    """
+    Check validity of params and insert rule to DB.
+    :param role:
+    :param resource_id:
+    :param permissions:
+    :return:
+    """
+    conn = create_connection("Utils\\Database\\auth.db")
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM Resources WHERE id=" + resource_id + ";")
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        print "resource doesn't exist!"
+        return False
+    cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        print "Invalid role!"
+        return False
+
+    query = "INSERT INTO Rules(role, resource_id, permissions) VALUES" \
+            "(\"" + role + "\", " + resource_id + ", \"" + permissions + "\");"
+    cur.execute(query)
+    conn.commit()
+    return True
+
+
+def delete_rule(role, resource_id):
+    conn = create_connection("Utils\\Database\\auth.db")
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM Resources WHERE id=" + resource_id + ";")
+        rows = cur.fetchall()
+    except Exception as e:
+        print str(e)
+        return False
+    if len(rows) == 0:
+        print "resource doesn't exist!"
+        return False
+
+    cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        print "Invalid role!"
+        return False
+
+    query = "DELETE FROM Rules WHERE resource_id= " + resource_id + " AND role= \"" + role + "\";"
+    cur.execute(query)
+    conn.commit()
     return True
 
 
@@ -185,6 +311,7 @@ def fetch_table(conn, table_name):
     Query all rows in the requested table
     :param conn: the Connection object
             table_name: The requested table name to pull from DB
+    :param table_name:
     :return: rows of requested table
     """
     cur = conn.cursor()

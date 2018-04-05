@@ -40,9 +40,9 @@ if __name__ == "__main__":
 
 
 def get_vulnerability_db():
-    file = "Utils\\NVD\\NVD_File\\Modified\\nvdcve-1.0-modified.json"
+    file_path = "Utils\\NVD\\NVD_File\\Modified\\nvdcve-1.0-modified.json"
 
-    file_data = open(file)
+    file_data = open(file_path)
 
     data = json.load(file_data)
     print json.dumps(data, indent=4, sort_keys=True)
