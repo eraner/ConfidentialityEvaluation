@@ -107,13 +107,9 @@ def check_auth_system():
                   "Yael Gershenshtein": "Guard",
                   "Nir Levi": "Developer",
                   "Omri Koresh": "QA"}
-    print "#"*15 + "Users" + "#"*15 + "\n\n"
-    print "Comparing current Users with optimal Users..\n"
-    results = AuthCheck.check_users_optimal_current(curr_users)
-    print "Results: \n" + results[0] + "\n\nDamage assessment to Users' table: " + str(results[1])
 
-    curr_roles = {"Manager": 5,
-                  "Cleaner": 1,
+    curr_roles = {"Manager": 1,
+                  "Cleaner": 5,
                   "Developer": 4,
                   "Team Leader": 4,
                   "Validation": 4,
@@ -121,10 +117,19 @@ def check_auth_system():
                   "FW Developer": 4,
                   "Guard": 2,
                   "QA": 3}
-    print "#"*15 + "Roles" + "#"*15 + "\n\n"
-    print "Comparing current Roles with optimal Roles..\n"
+    result = ""
+
+    result += "#"*15 + "Users" + "#"*15 + "\n\n"
+    result += "Comparing current Users with optimal Users..\n"
+    results = AuthCheck.check_users_optimal_current(curr_users, curr_roles)
+    result += "Results: \n" + results[0] + "\n\nDamage assessment to Users' table: " + str(results[1])
+
+    result += "\n" + "#"*15 + "Roles" + "#"*15 + "\n\n"
+    result += "Comparing current Roles with optimal Roles..\n"
     results = AuthCheck.check_roles_optimal_current(curr_roles)
-    print "Results:\n" + results[0] + "\n\nDamage assessment to roles' table: " + str(results[1])
+    result += "Results:\n" + results[0] + "\n\nDamage assessment to roles' table: " + str(results[1])
+
+    return result
 
 
 if __name__ == "__main__":
