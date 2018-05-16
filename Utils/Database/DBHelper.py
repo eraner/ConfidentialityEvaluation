@@ -146,15 +146,16 @@ def get_all_rules(conn):
     return fetch_table(conn, "Rules")
 
 
-def delete_role(role):
+def delete_role(role, main_window):
     conn = create_connection("Utils\\Database\\auth.db")
     cur = conn.cursor()
     query = "DELETE FROM Roles WHERE name= \"" + role + "\";"
     cur.execute(query)
     conn.commit()
+    main_window.print_to_log("Database", role + " was removed")
 
 
-def add_role(role, rank):
+def add_role(role, rank, main_window):
     """
     Insert new role to Database
     :param role:
@@ -167,11 +168,13 @@ def add_role(role, rank):
     try:
         cur.execute(query)
         conn.commit()
+        return True
     except Exception as e:
-        print "Something went wrong..\n" + str(e)
+        main_window.print_to_log("Database", "Something went wrong..\n" + str(e))
+        return False
 
 
-def add_user(username, role):
+def add_user(username, role, main_window):
     """
     Insert new user to Database
     :param username:
@@ -184,13 +187,13 @@ def add_user(username, role):
     cur.execute("SELECT * FROM Users WHERE u_name=\"" + username+"\";")
     rows = cur.fetchall()
     if len(rows) != 0:
-        print "username already exists!"
+        main_window.print_to_log("Database", "username already exists!")
         return False
 
     cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        print "Invalid role!"
+        main_window.print_to_log("Database", "Invalid role!")
         return False
 
     query = "INSERT INTO Users (id, u_name, role)" + \
@@ -201,7 +204,7 @@ def add_user(username, role):
     return True
 
 
-def delete_user(username):
+def delete_user(username, main_window):
     """
     remove user from Database
     :param username:
@@ -212,7 +215,7 @@ def delete_user(username):
     cur.execute("SELECT * FROM Users WHERE u_name=\"" + username + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        print "username doesn't exist!"
+        main_window.print_to_log("Database", "username doesn't exist!")
         return False
     query = "DELETE FROM Users WHERE u_name= \"" + username + "\";"
     cur.execute(query)
@@ -220,7 +223,7 @@ def delete_user(username):
     return True
 
 
-def add_resource(name, r_type):
+def add_resource(name, r_type, main_window):
     """
     add resource to table.
     :param name:
@@ -234,11 +237,12 @@ def add_resource(name, r_type):
     try:
         cur.execute(query)
         conn.commit()
+        return True
     except Exception as e:
         print "Something went wrong..\n" + str(e)
+        return False
 
-
-def delete_resource_by_id(id):
+def delete_resource_by_id(id, main_window):
     conn = create_connection("Utils\\Database\\auth.db")
     cur = conn.cursor()
     cur.execute("SELECT * FROM Resources WHERE id=" + id + ";")
@@ -252,7 +256,7 @@ def delete_resource_by_id(id):
     return True
 
 
-def add_rule(role, resource_id, permissions):
+def add_rule(role, resource_id, permissions, main_window):
     """
     Check validity of params and insert rule to DB.
     :param role:
@@ -266,12 +270,12 @@ def add_rule(role, resource_id, permissions):
     cur.execute("SELECT * FROM Resources WHERE id=" + resource_id + ";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        print "resource doesn't exist!"
+        main_window.print_to_log("Database", "resource doesn't exist!")
         return False
     cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        print "Invalid role!"
+        main_window.print_to_log("Database", "Invalid role!")
         return False
 
     query = "INSERT INTO Rules(role, resource_id, permissions) VALUES" \
@@ -281,23 +285,23 @@ def add_rule(role, resource_id, permissions):
     return True
 
 
-def delete_rule(role, resource_id):
+def delete_rule(role, resource_id, main_window):
     conn = create_connection("Utils\\Database\\auth.db")
     cur = conn.cursor()
     try:
         cur.execute("SELECT * FROM Resources WHERE id=" + resource_id + ";")
         rows = cur.fetchall()
     except Exception as e:
-        print str(e)
+        main_window.print_to_log("Database", str(e))
         return False
     if len(rows) == 0:
-        print "resource doesn't exist!"
+        main_window.print_to_log("Database", "resource doesn't exist!")
         return False
 
     cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        print "Invalid role!"
+        main_window.print_to_log("Database", "Invalid role!")
         return False
 
     query = "DELETE FROM Rules WHERE resource_id= " + resource_id + " AND role= \"" + role + "\";"
@@ -322,32 +326,32 @@ def fetch_table(conn, table_name):
     return rows
 
 
-def print_authorization_system():
+def print_authorization_system(main_window):
     con = create_connection("Utils\\Database\\auth.db")
 
     """Print Users Table"""
-    print("\n" + "-"*10 + "Getting all Users" + "-"*10)
+    main_window.print_to_log("DBHelper", "-"*10 + "Getting all Users" + "-"*10)
     allUsers = get_all_users(con)
     for user in allUsers:
-        print(user)
+        main_window.print_to_log("DBHelper", "[" + str(user[0]) + ". Username: " + user[1] + ", Role: " + user[2] + " ]")
 
     """Print Roles Table"""
-    print("\n" + "-"*10 + "Getting all Roles" + "-"*10)
+    main_window.print_to_log("DBHelper", "-"*10 + "Getting all Roles" + "-"*10)
     allRoles = get_all_roles(con)
     for role in allRoles:
-        print(role)
-
-    """Print Rules Table"""
-    print("\n" + "-"*10 + "Getting all Rules" + "-"*10)
-    allRules = get_all_rules(con)
-    for role in allRules:
-        print(role)
+        main_window.print_to_log("DBHelper", "[ Name: " + role[0] + ", Type: " + str(role[1]) + " ]")
 
     """Print Resources Table"""
-    print("\n" + "-"*10 + "Getting all Resources" + "-"*10)
+    main_window.print_to_log("DBHelper", "-"*10 + "Getting all Resources" + "-"*10)
     allResources = get_all_resources(con)
     for resource in allResources:
-        print(resource)
+        main_window.print_to_log("DBHelper", "[ " + str(resource[0]) + ". Name: " + resource[1] + ", Type: " + resource[2] + " ]")
+
+    """Print Rules Table"""
+    main_window.print_to_log("DBHelper", "-"*10 + "Getting all Rules" + "-"*10)
+    allRules = get_all_rules(con)
+    for rule in allRules:
+        main_window.print_to_log("DBHelper", "[ Role: " + rule[0] + ", ResourceID: " + str(rule[1]) + " --> " + rule[2] + " ]")
 
     con.close()
 

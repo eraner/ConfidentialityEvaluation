@@ -3,68 +3,72 @@ import Utils.NVD.NVD_Handler as NVD_Handler
 import AuthorizationSystem.AuthCheck as AuthCheck
 
 
-def add_user():
-    print "Please insert the required data: \n"
-    username = raw_input("Username: ")
-    role = raw_input("Role: ")
+def add_user(username, role, main_window):
+    #print "Please insert the required data: \n"
+    #username = raw_input("Username: ")
+    #role = raw_input("Role: ")
 
-    if DBHandler.add_user(username, role):
-        print "Added " + username + " successfully!"
+    if DBHandler.add_user(username, role, main_window):
+        main_window.print_to_log("Controller", "Added " + username + " successfully!")
     else:
-        print "Something went wrong!"
+        main_window.print_to_log("Controller", "Something went wrong!")
 
 
-def delete_user():
-    username = raw_input("Please insert User to delete: ")
-    DBHandler.delete_user(username)
+def delete_user(username, main_window):
+    #username = raw_input("Please insert User to delete: ")
+    if DBHandler.delete_user(username, main_window):
+        main_window.print_to_log("Controller", username + " was removed")
 
 
-def add_role():
-    print "Please insert the required data: \n"
-    role_name = raw_input("Role name: ")
-    rank = raw_input("Rank (1-5): ")
-    DBHandler.add_role(role_name, rank)
+def add_role(role_name, rank, main_window):
+   # print "Please insert the required data: \n"
+   # role_name = raw_input("Role name: ")
+   # rank = raw_input("Rank (1-5): ")
+    if DBHandler.add_role(role_name, rank, main_window):
+        main_window.print_to_log("Controller", role_name + " was added")
 
 
-def delete_role():
-    print "Please insert the required data: \n"
-    role_name = raw_input("Role name: ")
-    DBHandler.delete_role(role_name)
+def delete_role(role_name, main_window):
+    #role_name = raw_input("Role name: ")
+    DBHandler.delete_role(role_name, main_window)
 
 
-def add_resource():
-    print "Please insert the required data: \n"
-    resource_name = raw_input("Resource name: ")
-    resource_type = raw_input("Resource type: ")
-    DBHandler.add_resource(resource_name, resource_type)
-    print "Resource: " + resource_name + " was added"
+def add_resource(resource_name, resource_type, main_window):
+  #  print "Please insert the required data: \n"
+  #  resource_name = raw_input("Resource name: ")
+  #  resource_type = raw_input("Resource type: ")
+    if DBHandler.add_resource(resource_name, resource_type, main_window):
+        main_window.print_to_log("Controller", "Resource: " + resource_name + " was added")
 
 
-def delete_resource():
-    resource_id = raw_input("Please insert resource ID to remove: ")
-    DBHandler.delete_resource_by_id(resource_id)
+def delete_resource(resource_id, main_window):
+ #   resource_id = raw_input("Please insert resource ID to remove: ")
+    if DBHandler.delete_resource_by_id(resource_id, main_window):
+        main_window.print_to_log("Controller", "Resource id: " + resource_id + " was removed")
 
 
-def add_rule():
-    print "Please insert the required data: \n"
-    permissions = ["rw", "r", "x", "rwx"]
-    rule = raw_input("Role name: ")
-    resource_id = raw_input("Resource id: ")
-    for i in range(len(permissions)):
-        print str(i) + ". " + permissions[i]
-    perm_index = raw_input("Please choose the permission index: ")
-    if int(perm_index) not in range(len(permissions)):
-        print "Invalid permission index!"
-        return
-    DBHandler.add_rule(rule, resource_id, permissions[int(perm_index)])
-    print "Rule was added"
+def add_rule(role, resource_id, permission, main_window):
+#    print "Please insert the required data: \n"
+#    permissions = ["rw", "r", "x", "rwx"]
+#    role = raw_input("Role name: ")
+#    resource_id = raw_input("Resource id: ")
+#    for i in range(len(permissions)):
+#        print str(i) + ". " + permissions[i]
+#    perm_index = raw_input("Please choose the permission index: ")
+#    if int(perm_index) not in range(len(permissions)):
+#        print "Invalid permission index!"
+#        return
+    print permission
+    if DBHandler.add_rule(role, resource_id, permission, main_window):
+        main_window.print_to_log("Controller", "Rule was added")
 
 
-def delete_rule():
-    print "Please insert the required data: \n"
-    role = raw_input("Role: ")
-    resource_id = raw_input("Resource ID: ")
-    DBHandler.delete_rule(role, resource_id)
+def delete_rule(role, resource_id, main_window):
+   # print "Please insert the required data: \n"
+   # role = raw_input("Role: ")
+   # resource_id = raw_input("Resource ID: ")
+    if DBHandler.delete_rule(role, resource_id, main_window):
+        main_window.print_to_log("Controller", "Rule was removed!")
 
 
 def edit_auth_menu():
@@ -100,11 +104,17 @@ def edit_auth_menu():
             return
 
 
-def check_auth_system():
+def check_auth_system(main_window):
 
     curr_users = {"Eran Laudin": "Cleaner",
                   "Ohad Cohen": "Cleaner",
                   "Yael Gershenshtein": "Guard",
+                  "Avi": "Guard",
+                  "Keren": "Guard",
+                  "Or": "Guard",
+                  "Dvir": "Guard",
+                  "Amir": "Guard",
+                  "Yosi": "Guard",
                   "Nir Levi": "Developer",
                   "Omri Koresh": "QA"}
 
@@ -119,18 +129,21 @@ def check_auth_system():
                   "QA": 3}
     result = ""
 
-    result += "#"*15 + "Users" + "#"*15 + "\n\n"
-    result += "Comparing current Users with optimal Users..\n"
-    results = AuthCheck.check_users_optimal_current(curr_users, curr_roles)
-    result += "Results: \n" + results[0] + "\n\nDamage assessment to Users' table: " + str(results[1])
+    main_window.print_to_log("Controller", "#"*15 + "Users" + "#"*15)
+    main_window.print_to_log("Controller", "Comparing current Users with optimal Users..")
+    results = AuthCheck.check_users_roles_optimal_current(curr_users, curr_roles, main_window)
+    main_window.print_to_log("Controller", "Results: Damage assessment to Users' table: " + str(results))
 
-    result += "\n" + "#"*15 + "Roles" + "#"*15 + "\n\n"
-    result += "Comparing current Roles with optimal Roles..\n"
-    results = AuthCheck.check_roles_optimal_current(curr_roles)
-    result += "Results:\n" + results[0] + "\n\nDamage assessment to roles' table: " + str(results[1])
+    # result += "\n" + "#"*15 + "Roles" + "#"*15 + "\n\n"
+    # result += "Comparing current Roles with optimal Roles..\n"
+    # results = AuthCheck.check_roles_optimal_current(curr_roles)
+    # result += "Results: Damage assessment to roles' table: " + str(results[1])
+    return results
 
-    return result
 
+def print_auth_system(main_window):
+    main_window.print_to_log("Controller", "Printing Auth System")
+    DBHandler.print_authorization_system(main_window)
 
 if __name__ == "__main__":
     while True:

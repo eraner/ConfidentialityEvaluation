@@ -1,7 +1,7 @@
 import Utils.Database.DBHelper as DBHelper
 
 
-def check_users_optimal_current(curr_users, curr_roles):
+def check_users_roles_optimal_current(curr_users, curr_roles, main_window):
     """
     Compare between optimal and current Users&Roles tables in authorization system.
     :param: curr_users
@@ -26,21 +26,23 @@ def check_users_optimal_current(curr_users, curr_roles):
     opt_roles_ranks = [item[1] for item in opt_roles]
 
     if len(curr_users) > len(opt_users):
-        status_add_remove_user += "\nNew users were added! \n" \
-                  + str(len(curr_users) - len(opt_users)) + " new user\s were added\n"
+        # status_add_remove_user += "\nNew users were added! \n" \
+        #           + str(len(curr_users) - len(opt_users)) + " new user\s were added\n"
+        main_window.print_to_log("DBHelper", "New users were added!")
         for curr_user in curr_users.keys():
             if curr_user not in opt_users_names:
-                status_add_remove_user += "\t-" + curr_user + " was added \n"
+                main_window.print_to_log("DBHelper", curr_user + " was added")
                 users_damage_assessment += float(1)/max_users
 
     for opt_user in opt_users:
         if opt_user[1] not in curr_users.keys():
-            status_add_remove_user += "\n" + opt_user[1] + " was removed from authorization system"
+            main_window.print_to_log("DBHelper", opt_user[1] + " was removed from authorization system")
+            # status_add_remove_user += "\n" + opt_user[1] + " was removed from authorization system"
             users_damage_assessment += float(1) / max_users
             continue
         elif opt_user[2] != curr_users[opt_user[1]]:
-            status_change_role += "\n" + opt_user[1] + " has changed a role from: " \
-                                  + opt_user[2] + " to " + curr_users[opt_user[1]]
+            main_window.print_to_log("DBHelper", opt_user[1] + " has changed a role from: "
+                                     + opt_user[2] + " to " + curr_users[opt_user[1]])
 
         if opt_user[2] in opt_roles_names and curr_users[opt_user[1]] in opt_roles_names:
             index_of_opt_role = opt_roles_names.index(opt_user[2])
@@ -50,14 +52,12 @@ def check_users_optimal_current(curr_users, curr_roles):
             diff = 5
         users_damage_assessment += float(diff/5) / float(max_users)
 
-    status = "\n" + "-"*10 + "Users Add/Remove" + "-"*10 + "\n" + status_add_remove_user \
-             + "\n" + "-"*10 + "Roles Changes" + "-"*10 + "\n" + status_change_role
-    if status == "":
-        status = "No changes in Authorization system"
+    # status = "\n" + "-"*10 + "Users Add/Remove" + "-"*10 + "\n" + status_add_remove_user \
+    #          + "\n" + "-"*10 + "Roles Changes" + "-"*10 + "\n" + status_change_role
+    # if status == "":
+    #     status = "No changes in Authorization system"
 
-    retval = [status, users_damage_assessment]
-
-    return retval
+    return users_damage_assessment*10
 
 
 def check_roles_optimal_current(curr_roles):
