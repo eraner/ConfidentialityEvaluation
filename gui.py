@@ -5,18 +5,32 @@ import subprocess as sp
 
 
 def evaluate(log):
-    results = Controller.check_auth_system(log)
+    auth_results = Controller.check_auth_system(log)
+    NVD_results = Controller.find_nvd_vulnerabilities(log)
+
+    final_results = 0.8*auth_results + 0.2*NVD_results
+
     results_window = Tk()
+    results_window.title("Damage Score")
     color = ""
-    if results < 3:
+    if final_results < 3:
         color = "green"
-    elif results < 6:
+    elif final_results < 7:
         color = "yellow"
     else:
         color = "red"
     results_window.configure(bg=color)
-    label_result = Label(results_window, text="Damage assessment: " + str(results), bg=color, font=("Helvetica", 32))
-    label_result.pack(side="top")
+    label_auth_result = Label(results_window, text="Auth damage assessment: " + str(round(auth_results,2)), bg=color, font=("Helvetica", 32))
+    label_auth_result.pack(side="top")
+
+
+    label_nvd_result = Label(results_window, text="NVD summary: " + str(NVD_results), bg=color, font=("Helvetica", 32))
+    label_nvd_result.pack(side="top")
+
+
+    label_final_result = Label(results_window, text="Final result: " + str(round(final_results,2)), bg=color, font=("Helvetica", 40))
+    label_final_result.pack(side="top")
+
     results_window.mainloop()
 
 
@@ -28,10 +42,14 @@ def open_NVD(log):
 
 
 def update_NVD(log):
-    log.print_to_log("NVD", "Getting the latest NVD version..")
-    programName = "python"
-    fileName = "Utils\\NVD\\NVD_Handler.py"
-    sp.Popen([programName, fileName])
+    # programName = "python"
+    # fileName = "Utils\\NVD\\NVD_Handler.py"
+    # sp.Popen([programName, fileName])
+    Controller.update_NVD_file(log)
+
+
+def find_NVD(main_window):
+    Controller.find_nvd_vulnerabilities(main_window)
 
 
 class MainWindow:
@@ -40,10 +58,11 @@ class MainWindow:
         self.log_window = Tk()
         self.root = Tk()
         self.fields_open = False
+        self.edit_auth_open = False
 
         # Main window
         self.root.title("Confidentiality assessment")
-        self.root.geometry("600x450+200+200")
+        self.root.geometry("700x450+100+200")
 
         mainFrame = Frame(self.root)
         mainFrame.pack(side="top")
@@ -54,20 +73,24 @@ class MainWindow:
         self.root.mainloop()
 
     def add_buttons(self, mainFrame):
-        editButton = Button(mainFrame, text="Edit Opt database", command=lambda: self.edit_auth_system())
+        evaluateButton = Button(mainFrame, text="Evaluate confidentiality", command=lambda: evaluate(self), bg="red", font=(40))
+        evaluateButton.pack(side="bottom")
+
+        editButton = Button(mainFrame, text="Edit Opt database", command=lambda: self.edit_auth_system(), bg="yellow")
         editButton.pack(side="left")
 
-        evaluateButton = Button(mainFrame, text="Evaluate confidentiality", command=lambda: evaluate(self))
-        evaluateButton.pack(side="left")
-
-        openNVD = Button(mainFrame, text="Open NVD file", command=lambda: open_NVD(self))
+        openNVD = Button(mainFrame, text="Open NVD file", command=lambda: open_NVD(self), bg="yellow")
         openNVD.pack(side="left")
 
-        updateNVD = Button(mainFrame, text="Update NVD file", command=lambda: update_NVD(self))
+        updateNVD = Button(mainFrame, text="Update NVD file", command=lambda: update_NVD(self), bg="yellow")
         updateNVD.pack(side="left")
 
-        print_auth = Button(mainFrame, text="Present Auth system", command=lambda: Controller.print_auth_system(self))
+        print_auth = Button(mainFrame, text="Present Auth system", command=lambda: Controller.print_auth_system(self), bg="yellow")
         print_auth.pack(side="left")
+
+        NVD_search = Button(mainFrame, text="Find app in NVD", command=lambda: find_NVD(self), bg="yellow")
+        NVD_search.pack(side="left")
+
 
     def add_log(self):
         self.log_window.geometry("+810+0")
@@ -269,6 +292,9 @@ class MainWindow:
         self.fields_open = False
 
     def edit_auth_system(self):
+        if self.edit_auth_open:
+            return
+        self.edit_auth_open = True
         edit_frame = Frame(self.root, bg="gray", width=450, height=500, pady=10)
         edit_frame.pack()
 

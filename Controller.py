@@ -71,62 +71,78 @@ def delete_rule(role, resource_id, main_window):
         main_window.print_to_log("Controller", "Rule was removed!")
 
 
-def edit_auth_menu():
-    while True:
-        edit_choice = input("\nEdit Auth Menu: "
-                            "\n1. Add user."
-                           "\n2. Delete user."
-                           "\n3. Add role."
-                           "\n4. Delete role."
-                           "\n5. Add Resource."
-                           "\n6. Delete Resource."
-                           "\n7. Add Rule."
-                           "\n8. Delete Rule."
-                           "\n9. Return to main menu."
-                           "\nYour choice: ")
-        if edit_choice == 1:
-            add_user()
-        elif edit_choice == 2:
-            delete_user()
-        elif edit_choice == 3:
-            add_role()
-        elif edit_choice == 4:
-            delete_role()
-        elif edit_choice == 5:
-            add_resource()
-        elif edit_choice == 6:
-            delete_resource()
-        elif edit_choice == 7:
-            add_rule()
-        elif edit_choice == 8:
-            delete_rule()
-        elif edit_choice == 9:
-            return
-
-
 def check_auth_system(main_window):
+    # # No change to opt auth state
+    # curr_users = {"Eran Laudin": "Manager",
+    #               "Ohad Cohen": "Cleaner",
+    #               "Yael Gershenshtein": "Guard",
+    #               "Nir Levi": "Developer",
+    #               "Omri Koresh": "QA"}
+    # curr_roles = {"Manager": 1,
+    #               "Cleaner": 5,
+    #               "Developer": 3,
+    #               "Team Leader": 2,
+    #               "Guard": 4,
+    #               "QA": 4}
 
-    curr_users = {"Eran Laudin": "Cleaner",
-                  "Ohad Cohen": "Cleaner",
+
+    # # Minor change to opt auth state
+    # curr_users = {"Eran Laudin": "Manager",
+    #               "Ohad Cohen": "Cleaner",
+    #               "Yael Gershenshtein": "Guard",
+    #               "Nir Levi": "Developer",
+    #               "Omri Koresh": "QA"}
+    # curr_roles = {"Manager": 1,
+    #               "Cleaner": 4,
+    #               "Developer": 4,
+    #               "Team Leader": 2,
+    #               "Guard": 4,
+    #               "QA": 4}
+
+    # # Medium change to opt auth state
+    # curr_users = {"Eran Laudin": "Manager",
+    #               "Ohad Cohen": "Developer",
+    #               "Yael Gershenshtein": "Guard",
+    #               "Nir Levi": "Developer",
+    #               "Omri Koresh": "QA"}
+    # curr_roles = {"Manager": 5,
+    #               "Cleaner": 4,
+    #               "Developer": 1,
+    #               "Team Leader": 2,
+    #               "Guard": 4,
+    #               "QA": 1}
+
+    # Major change to opt auth state
+    curr_users = {"Eran Laudin": "Manager",
+                  "Ohad Cohen": "Developer",
                   "Yael Gershenshtein": "Guard",
-                  "Avi": "Guard",
-                  "Keren": "Guard",
-                  "Or": "Guard",
-                  "Dvir": "Guard",
-                  "Amir": "Guard",
-                  "Yosi": "Guard",
                   "Nir Levi": "Developer",
+                  "Avi": "Developer",
+                  "Or": "Developer",
                   "Omri Koresh": "QA"}
+    curr_roles = {"Manager": 5,
+                  "Cleaner": 1,
+                  "Developer": 1,
+                  "Team Leader": 5,
+                  "Guard": 1,
+                  "QA": 1}
 
-    curr_roles = {"Manager": 1,
-                  "Cleaner": 5,
-                  "Developer": 4,
-                  "Team Leader": 4,
-                  "Validation": 4,
-                  "Architecture": 4,
-                  "FW Developer": 4,
-                  "Guard": 2,
-                  "QA": 3}
+    # # Worst change to opt auth state
+    # curr_users = {"Eran Laudin": "Manager",
+    #               "Nir Levi": "Developer",
+    #               "Avi": "Developer",
+    #               "Or": "Developer",
+    #               "Oren": "Developer",
+    #               "Idan": "Cleaner",
+    #               "Yossi": "Guard",
+    #               "Omri Koresh": "QA"}
+    # curr_roles = {"Manager": 5,
+    #               "Cleaner": 1,
+    #               "Developer": 1,
+    #               "Team Leader": 5,
+    #               "Guard": 1,
+    #               "QA": 1}
+
     result = ""
 
     main_window.print_to_log("Controller", "#"*15 + "Users" + "#"*15)
@@ -141,31 +157,74 @@ def check_auth_system(main_window):
     return results
 
 
+def update_NVD_file(main_window):
+    main_window.print_to_log("Controller", "Getting the latest NVD version..")
+    NVD_Handler.update_nvd_file(main_window)
+
+
+def find_nvd_vulnerabilities(main_window):
+    app_list = ["big_brother", "net-snmp", "safari", "skype"]
+    #app_list = ["word"]
+    #app_list = ["big_brother"]
+    return NVD_Handler.get_vulnerability_impact(app_list, main_window)
+
+
 def print_auth_system(main_window):
     main_window.print_to_log("Controller", "Printing Auth System")
     DBHandler.print_authorization_system(main_window)
 
-if __name__ == "__main__":
-    while True:
-        choice = input("\nMenu: \n1. Print Authorization Details."
-                       "        \n2. Print NVD."
-                       "        \n3. Check Authorization system."
-                       "        \n4. Edit Authorization system."        
-                       "        \n9. Exit"
-                       "        \nYour choice: ")
-        if choice == 1:
-            DBHandler.print_authorization_system()
-        elif choice == 2:
-            NVD_Handler.get_vulnerability_db()
-        elif choice == 3:
-            check_auth_system()
-        elif choice == 4:
-            edit_auth_menu()
-        elif choice == 9:
-            print "Goodbye"
-            break
-        else:
-            print "Wrong Input!"
+# def edit_auth_menu():
+#     while True:
+#         edit_choice = input("\nEdit Auth Menu: "
+#                             "\n1. Add user."
+#                            "\n2. Delete user."
+#                            "\n3. Add role."
+#                            "\n4. Delete role."
+#                            "\n5. Add Resource."
+#                            "\n6. Delete Resource."
+#                            "\n7. Add Rule."
+#                            "\n8. Delete Rule."
+#                            "\n9. Return to main menu."
+#                            "\nYour choice: ")
+#         if edit_choice == 1:
+#             add_user()
+#         elif edit_choice == 2:
+#             delete_user()
+#         elif edit_choice == 3:
+#             add_role()
+#         elif edit_choice == 4:
+#             delete_role()
+#         elif edit_choice == 5:
+#             add_resource()
+#         elif edit_choice == 6:
+#             delete_resource()
+#         elif edit_choice == 7:
+#             add_rule()
+#         elif edit_choice == 8:
+#             delete_rule()
+#         elif edit_choice == 9:
+#             return
+# if __name__ == "__main__":
+#     while True:
+#         choice = input("\nMenu: \n1. Print Authorization Details."
+#                        "        \n2. Print NVD."
+#                        "        \n3. Check Authorization system."
+#                        "        \n4. Edit Authorization system."
+#                        "        \n9. Exit"
+#                        "        \nYour choice: ")
+#         if choice == 1:
+#             DBHandler.print_authorization_system()
+#         elif choice == 2:
+#             NVD_Handler.get_vulnerability_db()
+#         elif choice == 3:
+#             check_auth_system()
+#         elif choice == 4:
+#             edit_auth_menu()
+#         elif choice == 9:
+#             print "Goodbye"
+#             break
+#         else:
+#             print "Wrong Input!"
 
 
 

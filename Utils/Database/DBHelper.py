@@ -105,7 +105,7 @@ def create_connection(db_file):
         conn = sqlite3.connect(db_file)
         return conn
     except Error as e:
-        print(e)
+        print e
 
     return None
 
@@ -152,7 +152,7 @@ def delete_role(role, main_window):
     query = "DELETE FROM Roles WHERE name= \"" + role + "\";"
     cur.execute(query)
     conn.commit()
-    main_window.print_to_log("Database", role + " was removed")
+    main_window.print_to_log("DBHelper", role + " was removed")
 
 
 def add_role(role, rank, main_window):
@@ -170,7 +170,7 @@ def add_role(role, rank, main_window):
         conn.commit()
         return True
     except Exception as e:
-        main_window.print_to_log("Database", "Something went wrong..\n" + str(e))
+        main_window.print_to_log("DBHelper", "Something went wrong..\n" + str(e))
         return False
 
 
@@ -187,13 +187,13 @@ def add_user(username, role, main_window):
     cur.execute("SELECT * FROM Users WHERE u_name=\"" + username+"\";")
     rows = cur.fetchall()
     if len(rows) != 0:
-        main_window.print_to_log("Database", "username already exists!")
+        main_window.print_to_log("DBHelper", "username already exists!")
         return False
 
     cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        main_window.print_to_log("Database", "Invalid role!")
+        main_window.print_to_log("DBHelper", "Invalid role!")
         return False
 
     query = "INSERT INTO Users (id, u_name, role)" + \
@@ -215,7 +215,7 @@ def delete_user(username, main_window):
     cur.execute("SELECT * FROM Users WHERE u_name=\"" + username + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        main_window.print_to_log("Database", "username doesn't exist!")
+        main_window.print_to_log("DBHelper", "username doesn't exist!")
         return False
     query = "DELETE FROM Users WHERE u_name= \"" + username + "\";"
     cur.execute(query)
@@ -239,8 +239,9 @@ def add_resource(name, r_type, main_window):
         conn.commit()
         return True
     except Exception as e:
-        print "Something went wrong..\n" + str(e)
+        main_window.print_to_log("DBHelper", "Something went wrong..\n" + str(e))
         return False
+
 
 def delete_resource_by_id(id, main_window):
     conn = create_connection("Utils\\Database\\auth.db")
@@ -248,7 +249,7 @@ def delete_resource_by_id(id, main_window):
     cur.execute("SELECT * FROM Resources WHERE id=" + id + ";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        print "resource doesn't exist!"
+        main_window.print_to_log("DBHelper", "resource doesn't exist!")
         return False
     query = "DELETE FROM Resources WHERE id= " + id + ";"
     cur.execute(query)
@@ -270,12 +271,12 @@ def add_rule(role, resource_id, permissions, main_window):
     cur.execute("SELECT * FROM Resources WHERE id=" + resource_id + ";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        main_window.print_to_log("Database", "resource doesn't exist!")
+        main_window.print_to_log("DBHelper", "resource doesn't exist!")
         return False
     cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        main_window.print_to_log("Database", "Invalid role!")
+        main_window.print_to_log("DBHelper", "Invalid role!")
         return False
 
     query = "INSERT INTO Rules(role, resource_id, permissions) VALUES" \
@@ -292,16 +293,16 @@ def delete_rule(role, resource_id, main_window):
         cur.execute("SELECT * FROM Resources WHERE id=" + resource_id + ";")
         rows = cur.fetchall()
     except Exception as e:
-        main_window.print_to_log("Database", str(e))
+        main_window.print_to_log("DBHelper", str(e))
         return False
     if len(rows) == 0:
-        main_window.print_to_log("Database", "resource doesn't exist!")
+        main_window.print_to_log("DBHelper", "resource doesn't exist!")
         return False
 
     cur.execute("SELECT * FROM Roles WHERE name=\"" + role + "\";")
     rows = cur.fetchall()
     if len(rows) == 0:
-        main_window.print_to_log("Database", "Invalid role!")
+        main_window.print_to_log("DBHelper", "Invalid role!")
         return False
 
     query = "DELETE FROM Rules WHERE resource_id= " + resource_id + " AND role= \"" + role + "\";"
