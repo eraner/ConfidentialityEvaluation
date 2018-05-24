@@ -7,8 +7,9 @@ import subprocess as sp
 def evaluate(log):
     auth_results = Controller.check_auth_system(log)
     NVD_results = Controller.find_nvd_vulnerabilities(log)
+    prediction_results = Controller.get_prediction(NVD_results[1], log)
 
-    final_results = 0.8*auth_results + 0.2*NVD_results
+    final_results = 0.7*auth_results + 0.2*NVD_results[0] + prediction_results*0.1
 
     results_window = Tk()
     results_window.title("Damage Score")
@@ -20,16 +21,19 @@ def evaluate(log):
     else:
         color = "red"
     results_window.configure(bg=color)
-    label_auth_result = Label(results_window, text="Auth damage assessment: " + str(round(auth_results,2)), bg=color, font=("Helvetica", 32))
+    label_auth_result = Label(results_window, text="Auth damage assessment(70%): " + str(round(auth_results, 2)), bg=color, font=("Helvetica", 32))
     label_auth_result.pack(side="top")
 
-
-    label_nvd_result = Label(results_window, text="NVD summary: " + str(NVD_results), bg=color, font=("Helvetica", 32))
+    label_nvd_result = Label(results_window, text="NVD summary(20%): " + str(round(NVD_results[0], 2)), bg=color, font=("Helvetica", 32))
     label_nvd_result.pack(side="top")
 
-
-    label_final_result = Label(results_window, text="Final result: " + str(round(final_results,2)), bg=color, font=("Helvetica", 40))
+    label_final_result = Label(results_window, text="Prediction result(10%): " + str(round(prediction_results, 2)), bg=color, font=("Helvetica", 32))
     label_final_result.pack(side="top")
+
+    label_final_result = Label(results_window, text="Final result: " + str(round(final_results, 2)), bg=color, font=("Helvetica", 40))
+    label_final_result.pack(side="top")
+
+    Controller.insert_result_to_history(final_results, NVD_results[1], log)
 
     results_window.mainloop()
 
@@ -88,7 +92,7 @@ class MainWindow:
         print_auth = Button(mainFrame, text="Present Auth system", command=lambda: Controller.print_auth_system(self), bg="yellow")
         print_auth.pack(side="left")
 
-        NVD_search = Button(mainFrame, text="Find app in NVD", command=lambda: find_NVD(self), bg="yellow")
+        NVD_search = Button(mainFrame, text="Scan apps in NVD", command=lambda: find_NVD(self), bg="yellow")
         NVD_search.pack(side="left")
 
 

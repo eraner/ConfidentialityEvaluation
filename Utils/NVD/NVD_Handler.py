@@ -95,6 +95,7 @@ def get_vulnerability_impact(list_of_apps, main_window):
     :param main_window:
     :return: Damage score 0-10.
     """
+    damaged_apps = []
     file_path = "Utils\\NVD\\NVD_File\\Modified\\nvdcve-1.0-modified.json"
     with open(file_path) as data_file:
         data = json.load(data_file)
@@ -108,14 +109,17 @@ def get_vulnerability_impact(list_of_apps, main_window):
             for product_data in vendor_data["product"]["product_data"]:
                 if product_data["product_name"] in list_of_apps:
                     impact_score = cve["impact"]["baseMetricV2"]["cvssV2"]["baseScore"]
-                    NVD_score += impact_score
+                    NVD_score += (impact_score/10.0)/(len(list_of_apps)/10.0)
                     main_window.print_to_log("NVD_Handler", "Found vulnerability!")
+                    damaged_apps.append(product_data["product_name"])
                     main_window.print_to_log("NVD_Handler",
                                                    "Impact score for " + product_data["product_name"] +
                                                    " is: " + str(impact_score))
                     main_window.print_to_log("NVD_Handler", "Description: "
                                              + cve["cve"]["description"]["description_data"][0]["value"])
 
-    main_window.print_to_log("NVD_Handler", "System's apps weren't in the NVD! Good!!") if NVD_score==0 else None
+    main_window.print_to_log("NVD_Handler", "System's apps weren't in the NVD! Good!!") if NVD_score == 0 else None
     main_window.print_to_log("NVD_Handler", "Done")
-    return 10 if NVD_score > 10 else NVD_score
+
+    NVD_score = 10 if NVD_score > 10 else NVD_score
+    return [NVD_score, damaged_apps]
